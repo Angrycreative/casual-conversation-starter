@@ -31,6 +31,6 @@ window.TOPICS = [
   "The job you thought you'd have when you were ten.",
   "A skill from a past job or life that's weirdly useful now.",
   "Where you grew up, and one thing about it most people wouldn't know.",
-  "What's the best thing you've worked on lately or realy enjoyed?",
+  "What's the best thing you've worked on lately or really enjoyed?",
   "What would you love to work on?",
 ];
