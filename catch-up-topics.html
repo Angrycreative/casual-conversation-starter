@@ -1,0 +1,335 @@
+<!-- Catch-up topic spinner — single-file, no build step. Open in any browser. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catch-up topics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Hanken+Grotesque:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --teal:    #15403F;
+    --teal-2:  #0E302F;
+    --paper:   #FBF4E6;
+    --coral:   #F0654B;
+    --coral-d: #D8482F;
+    --mustard: #E9A23B;
+    --ink:     #16302F;
+    --muted:   #5C7170;
+    --line:    rgba(22,48,47,0.12);
+    --display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+    --body:    "Hanken Grotesque", system-ui, -apple-system, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; }
+
+  body {
+    font-family: var(--body);
+    color: var(--paper);
+    background:
+      radial-gradient(900px 500px at 85% -10%, rgba(233,162,59,0.18), transparent 60%),
+      radial-gradient(700px 600px at -5% 110%, rgba(240,101,75,0.16), transparent 55%),
+      var(--teal);
+    min-height: 100vh;
+    padding: clamp(20px, 4vw, 56px);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 760px; margin: 0 auto; }
+
+  /* Header */
+  .eyebrow {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--mustard);
+    margin: 0 0 10px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .eyebrow::before {
+    content: ""; width: 26px; height: 2px; background: var(--mustard); display: inline-block;
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(30px, 6vw, 48px);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    margin: 0 0 6px;
+  }
+  .sub { color: rgba(251,244,230,0.7); margin: 0 0 28px; font-size: 15px; }
+
+  /* The stage */
+  .card {
+    position: relative;
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 22px;
+    padding: clamp(28px, 5vw, 48px);
+    min-height: 230px;
+    display: flex; flex-direction: column; justify-content: center;
+    box-shadow: 0 24px 60px -28px rgba(0,0,0,0.55);
+    overflow: hidden;
+  }
+  .card::after { /* mustard tab in the corner, the "you're here" marker */
+    content: ""; position: absolute; top: 0; right: 34px;
+    width: 46px; height: 14px; background: var(--mustard);
+    border-radius: 0 0 7px 7px;
+  }
+  .card-label {
+    font-family: var(--display);
+    font-size: 12px; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 14px;
+  }
+  .topic {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(22px, 4.4vw, 32px);
+    line-height: 1.16;
+    letter-spacing: -0.015em;
+    margin: 0;
+    min-height: 1.16em;
+  }
+  .card.spinning .topic { color: var(--muted); }
+  .card.landed { animation: pop 0.42s cubic-bezier(.2,.9,.3,1.3); }
+  @keyframes pop { 0% { transform: scale(0.985); } 60% { transform: scale(1.012); } 100% { transform: scale(1); } }
+
+  /* Controls */
+  .controls {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    margin: 22px 0 8px;
+  }
+  .spin {
+    font-family: var(--display);
+    font-weight: 700; font-size: 17px; letter-spacing: 0.01em;
+    color: var(--paper); background: var(--coral);
+    border: none; border-radius: 14px;
+    padding: 15px 30px; cursor: pointer;
+    box-shadow: 0 8px 0 0 var(--coral-d);
+    transition: transform .08s ease, box-shadow .08s ease;
+  }
+  .spin:hover { transform: translateY(-1px); box-shadow: 0 9px 0 0 var(--coral-d); }
+  .spin:active { transform: translateY(6px); box-shadow: 0 2px 0 0 var(--coral-d); }
+  .spin:disabled { opacity: .55; cursor: default; transform: none; box-shadow: 0 8px 0 0 var(--coral-d); }
+  .spin:focus-visible { outline: 3px solid var(--mustard); outline-offset: 3px; }
+
+  .count { font-size: 14px; color: rgba(251,244,230,0.72); }
+  .count b { color: var(--paper); font-weight: 600; }
+
+  .toggle {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 14px; color: rgba(251,244,230,0.82); cursor: pointer;
+    margin-left: auto;
+  }
+  .toggle input { accent-color: var(--mustard); width: 16px; height: 16px; cursor: pointer; }
+
+  /* The list / doc */
+  .list-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin: 40px 0 14px; gap: 12px;
+  }
+  .list-head h2 {
+    font-family: var(--display); font-weight: 600; font-size: 14px;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--mustard); margin: 0;
+  }
+  .reset {
+    background: none; border: 1px solid rgba(251,244,230,0.28); color: rgba(251,244,230,0.82);
+    border-radius: 9px; padding: 7px 14px; font-family: var(--body); font-size: 13px; cursor: pointer;
+    transition: border-color .15s, color .15s;
+  }
+  .reset:hover { border-color: var(--mustard); color: var(--paper); }
+  .reset:focus-visible { outline: 2px solid var(--mustard); outline-offset: 2px; }
+
+  ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  li button {
+    width: 100%; text-align: left; cursor: pointer;
+    display: flex; gap: 14px; align-items: flex-start;
+    background: rgba(251,244,230,0.05);
+    border: 1px solid var(--line);
+    border-left: 3px solid transparent;
+    color: var(--paper);
+    font-family: var(--body); font-size: 15.5px; line-height: 1.4;
+    padding: 13px 16px; border-radius: 11px;
+    transition: background .14s, border-color .14s;
+  }
+  li button:hover { background: rgba(251,244,230,0.1); }
+  li button:focus-visible { outline: 2px solid var(--mustard); outline-offset: 2px; }
+  li .num {
+    font-family: var(--display); font-weight: 600; font-size: 13px;
+    color: var(--mustard); min-width: 22px; padding-top: 2px;
+  }
+  li.used button { color: rgba(251,244,230,0.38); background: transparent; }
+  li.used .txt { text-decoration: line-through; text-decoration-color: rgba(251,244,230,0.4); }
+  li.used .num { color: rgba(251,244,230,0.3); }
+  li.current button { border-left-color: var(--coral); background: rgba(240,101,75,0.14); }
+
+  .hint { font-size: 13px; color: rgba(251,244,230,0.5); margin: 14px 0 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card.landed { animation: none; }
+    .spin, .spin:hover, .spin:active { transition: none; }
+  }
+</style>
+
+<div class="wrap">
+  <p class="eyebrow">30-minute catch-up</p>
+  <h1>What should we talk about?</h1>
+  <p class="sub">Hit spin for a prompt, or pick one from the list. Work-adjacent, never about the actual work.</p>
+
+  <div class="card" id="card">
+    <p class="card-label">Today's prompt</p>
+    <p class="topic" id="topic">Press spin to get started.</p>
+  </div>
+
+  <div class="controls">
+    <button class="spin" id="spin">Spin a topic</button>
+    <span class="count" id="count"></span>
+    <label class="toggle">
+      <input type="checkbox" id="norepeat" checked>
+      Don't repeat in this session
+    </label>
+  </div>
+
+  <div class="list-head">
+    <h2>All topics</h2>
+    <button class="reset" id="reset">Reset session</button>
+  </div>
+  <ol id="list"></ol>
+  <p class="hint">Tip: tap any topic to grey it out once you've covered it. Refreshing the page starts a fresh session.</p>
+</div>
+
+<script>
+  const TOPICS = [
+    "Last movie, game, or show you finished — was it worth it?",
+    "One small purchase under €30 that made your life better.",
+    "What's on your desk right now that has nothing to do with work?",
+    "How are you actually using AI in your personal life?",
+    "A piece of tech you refuse to upgrade or give up.",
+    "Smart home gear: genuinely useful, or a solution looking for a problem?",
+    "Analog things you've gone back to — paper notebooks, vinyl, film cameras…",
+    "Weirdest place you've ever joined a call from.",
+    "Your ideal work-from-anywhere spot if logistics didn't matter.",
+    "A hobby you're secretly quite good at.",
+    "Something you tried to learn this year — and how it went.",
+    "A side project or creative thing you're tinkering with.",
+    "Your real food hill to die on (pineapple on pizza is just the start).",
+    "Some petty everyday \u2018right way\u2019 to do something you'll defend forever.",
+    "Best decade for music, movies, or games — defend it.",
+    "First computer or console you ever had.",
+    "The job you thought you'd have when you were ten.",
+    "A skill from a past job or life that's weirdly useful now.",
+    "Where you grew up, and one thing about it most people wouldn't know."
+  ];
+
+  const used = new Set();
+  let current = -1;
+  let spinning = false;
+
+  const cardEl   = document.getElementById('card');
+  const topicEl  = document.getElementById('topic');
+  const spinBtn  = document.getElementById('spin');
+  const countEl  = document.getElementById('count');
+  const listEl   = document.getElementById('list');
+  const noRepeat = document.getElementById('norepeat');
+  const resetBtn = document.getElementById('reset');
+
+  // Build the list
+  TOPICS.forEach((t, i) => {
+    const li = document.createElement('li');
+    li.dataset.i = i;
+    const btn = document.createElement('button');
+    btn.innerHTML = `<span class="num">${String(i + 1).padStart(2, '0')}</span><span class="txt">${t}</span>`;
+    btn.addEventListener('click', () => toggleUsed(i));
+    li.appendChild(btn);
+    listEl.appendChild(li);
+  });
+
+  function pool() {
+    if (!noRepeat.checked) return TOPICS.map((_, i) => i);
+    return TOPICS.map((_, i) => i).filter(i => !used.has(i));
+  }
+
+  function updateCount() {
+    const left = pool().length;
+    countEl.innerHTML = noRepeat.checked
+      ? `<b>${left}</b> of ${TOPICS.length} left`
+      : `${TOPICS.length} topics`;
+  }
+
+  function render() {
+    [...listEl.children].forEach(li => {
+      const i = +li.dataset.i;
+      li.classList.toggle('used', used.has(i));
+      li.classList.toggle('current', i === current);
+    });
+    updateCount();
+  }
+
+  function setCurrent(i) {
+    current = i;
+    topicEl.textContent = TOPICS[i];
+    if (noRepeat.checked) used.add(i);
+    render();
+  }
+
+  function toggleUsed(i) {
+    if (used.has(i)) used.delete(i); else used.add(i);
+    if (i === current && used.has(i)) { /* keep showing it, just mark used */ }
+    render();
+  }
+
+  function spin() {
+    if (spinning) return;
+    let candidates = pool();
+    if (candidates.length === 0) {
+      topicEl.textContent = "That's all of them — hit reset to go again.";
+      cardEl.classList.remove('spinning');
+      return;
+    }
+    spinning = true;
+    spinBtn.disabled = true;
+    cardEl.classList.remove('landed');
+    cardEl.classList.add('spinning');
+
+    const final = candidates[Math.floor(Math.random() * candidates.length)];
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (reduced) { land(final); return; }
+
+    let delay = 55;
+    const tick = () => {
+      const all = TOPICS.map((_, i) => i);
+      topicEl.textContent = TOPICS[all[Math.floor(Math.random() * all.length)]];
+      delay *= 1.14;
+      if (delay < 300) {
+        setTimeout(tick, delay);
+      } else {
+        land(final);
+      }
+    };
+    tick();
+  }
+
+  function land(i) {
+    cardEl.classList.remove('spinning');
+    setCurrent(i);
+    cardEl.classList.add('landed');
+    spinning = false;
+    spinBtn.disabled = false;
+  }
+
+  spinBtn.addEventListener('click', spin);
+  noRepeat.addEventListener('change', updateCount);
+  resetBtn.addEventListener('click', () => {
+    used.clear(); current = -1;
+    topicEl.textContent = "Press spin to get started.";
+    cardEl.classList.remove('landed');
+    render();
+  });
+
+  render();
+</script>
