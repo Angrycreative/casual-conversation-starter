@@ -202,28 +202,17 @@
   <p class="hint">Tip: tap any topic to grey it out once you've covered it. Refreshing the page starts a fresh session.</p>
 </div>
 
+<!-- Topics live in their own file so anyone can edit the list without touching this page. -->
+<script src="topics.js"></script>
 <script>
-  const TOPICS = [
-    "Last movie, game, or show you finished — was it worth it?",
-    "One small purchase under €30 that made your life better.",
-    "What's on your desk right now that has nothing to do with work?",
-    "How are you actually using AI in your personal life?",
-    "A piece of tech you refuse to upgrade or give up.",
-    "Smart home gear: genuinely useful, or a solution looking for a problem?",
-    "Analog things you've gone back to — paper notebooks, vinyl, film cameras…",
-    "Weirdest place you've ever joined a call from.",
-    "Your ideal work-from-anywhere spot if logistics didn't matter.",
-    "A hobby you're secretly quite good at.",
-    "Something you tried to learn this year — and how it went.",
-    "A side project or creative thing you're tinkering with.",
-    "Your real food hill to die on (pineapple on pizza is just the start).",
-    "Some petty everyday \u2018right way\u2019 to do something you'll defend forever.",
-    "Best decade for music, movies, or games — defend it.",
-    "First computer or console you ever had.",
-    "The job you thought you'd have when you were ten.",
-    "A skill from a past job or life that's weirdly useful now.",
-    "Where you grew up, and one thing about it most people wouldn't know."
-  ];
+  const TOPICS = Array.isArray(window.TOPICS) ? window.TOPICS : [];
+
+  // If topics.js is missing, broken, or empty, say so plainly instead of failing silently.
+  if (TOPICS.length === 0) {
+    document.getElementById('topic').textContent =
+      "No topics loaded — check that topics.js sits next to this page and has at least one entry.";
+    document.getElementById('spin').disabled = true;
+  }
 
   const used = new Set();
   let current = -1;
